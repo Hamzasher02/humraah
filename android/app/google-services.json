@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "962890456787",
+    "firebase_url": "https://pdfup-532a2-default-rtdb.firebaseio.com",
+    "project_id": "pdfup-532a2",
+    "storage_bucket": "pdfup-532a2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:962890456787:android:fed7fac73744176be6fe26",
+        "android_client_info": {
+          "package_name": "com.example.adminlast"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "962890456787-1n19p05e7ufdsu7k0397hls4iera006h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7uzEjuK_lDfXkCYzfCBXtuDnz5N4_n1A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "962890456787-1n19p05e7ufdsu7k0397hls4iera006h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
