@@ -56,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.amp_stories),
             label: 'Add Story',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.movie), label: 'Add Movies'),
+          BottomNavigationBarItem(icon: Icon(Icons.movie), label: 'Top Search'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'tralor'),
           BottomNavigationBarItem(
             icon: Icon(Icons.supervised_user_circle),

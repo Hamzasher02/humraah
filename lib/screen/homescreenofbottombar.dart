@@ -43,7 +43,7 @@ class SafeImage extends StatelessWidget {
 /// initializes the video controller, and replaces the image with the video.
 /// Additionally, tapping the video toggles between pause and play.
 class BannerSection extends StatefulWidget {
-  const BannerSection({Key? key}) : super(key: key);
+  const BannerSection({super.key});
 
   @override
   _BannerSectionState createState() => _BannerSectionState();
@@ -67,8 +67,7 @@ class _BannerSectionState extends State<BannerSection> {
             .limit(1)
             .get();
     if (trailerSnapshot.docs.isNotEmpty) {
-      final trailerData =
-          trailerSnapshot.docs.first.data() as Map<String, dynamic>;
+      final trailerData = trailerSnapshot.docs.first.data();
       final videoUrl = trailerData['videoUrl'] as String;
       // Initialize the VideoPlayerController with the fetched URL.
       _controller = VideoPlayerController.network(videoUrl)
@@ -192,7 +191,7 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: SafeImage(imageUrl: 'assets/logoup.jpeg', fit: BoxFit.contain),
+          child: SafeImage(imageUrl: 'assets/logo.png', fit: BoxFit.contain),
         ),
         actions: [
           IconButton(
@@ -602,6 +601,7 @@ class HomeScreen extends StatelessWidget {
         ),
         SizedBox(
           height: 150,
+          // width: 150,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: videos.length,

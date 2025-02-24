@@ -12,10 +12,10 @@ class AddEpisodeScreen extends StatefulWidget {
   final String videoId;
 
   const AddEpisodeScreen({
-    Key? key,
+    super.key,
     required this.categoryId,
     required this.videoId,
-  }) : super(key: key);
+  });
 
   @override
   _AddEpisodeScreenState createState() => _AddEpisodeScreenState();

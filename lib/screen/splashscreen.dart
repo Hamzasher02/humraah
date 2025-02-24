@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../admin/mainscreen.dart'; // Admin Screen
-
 import 'guestscreen.dart';
 import 'home.dart'; // Guest Screen for new users
 
@@ -45,17 +44,13 @@ class _SplashScreenState extends State<SplashScreen> {
             if (role == 'admin') {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => MainScreen(),
-                ), // Admin Panel
+                MaterialPageRoute(builder: (context) => MainScreen()),
               );
               return;
             } else if (role == 'user') {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => BottomBarScreen(),
-                ), // User Panel
+                MaterialPageRoute(builder: (context) => BottomBarScreen()),
               );
               return;
             }
@@ -66,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
       }
     }
 
-    // If no user is logged in or role is undefined, navigate to GuestScreen (Login)
+    // If no user is logged in or role is undefined, navigate to WatchScreen (Guest/Login)
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => WatchScreen()),
@@ -76,22 +71,28 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/logoup.jpeg', width: 200),
-            const SizedBox(height: 20),
-            const Text(
-              "Welcome to Humraah",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal,
+      // Set scaffold background to transparent
+      backgroundColor: Colors.transparent,
+      body: Container(
+        // Ensure container background is transparent
+        decoration: const BoxDecoration(color: Colors.transparent),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Ensure your asset (logo.png) supports transparency
+              Image.asset('assets/logo.png', width: 200),
+              const SizedBox(height: 20),
+              const Text(
+                "Welcome to Humraah",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

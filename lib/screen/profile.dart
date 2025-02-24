@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // For Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'auth/login.dart';
+import 'account.dart';
 
 class ProfileScreen extends StatelessWidget {
-  // This list was in your code, but we are not changing design or logic here:
+  // A sample list of profiles (if needed for other UI parts).
   final List<Map<String, String>> profiles = [
     {'name': 'John', 'image': 'assets/profile1.png'},
     {'name': 'Emma', 'image': 'assets/profile2.png'},
@@ -14,7 +16,7 @@ class ProfileScreen extends StatelessWidget {
 
   ProfileScreen({super.key});
 
-  // Sign Out Button (unchanged)
+  // Sign Out Button
   Widget _buildSignOutButton(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -24,8 +26,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       onPressed: () async {
         try {
-          await FirebaseAuth.instance.signOut(); // Sign out the user
-          // Navigate to login screen and remove all previous routes
+          await FirebaseAuth.instance.signOut();
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => LoginScreen()),
             (Route<dynamic> route) => false,
@@ -45,13 +46,9 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the currently logged-in user
+    // Get the current user.
     final user = FirebaseAuth.instance.currentUser;
-    // If displayName is set, use that; otherwise fallback to email or a placeholder
-    final userName =
-        user?.displayName?.isNotEmpty == true
-            ? user!.displayName
-            : user?.email ?? 'No user found';
+    final isWeb = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -62,7 +59,6 @@ class ProfileScreen extends StatelessWidget {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final isWeb = constraints.maxWidth > 600; // Check if web or mobile
           return Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 20.0,
@@ -71,55 +67,88 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Profile Avatar and Name Section (same design)
-                Center(
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: isWeb ? 80 : 60, // Adjust size for web
-                        backgroundImage: const AssetImage(
-                          'assets/Profile-ring.png',
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Show the current user's name/email
-                          Text(
-                            userName!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                // Fetch and display the current user's profile info.
+                if (user != null)
+                  StreamBuilder<DocumentSnapshot>(
+                    stream:
+                        FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(user.uid)
+                            .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final data =
+                          snapshot.data!.data() as Map<String, dynamic>? ?? {};
+                      final profileName = data['profileName'] ?? user.email;
+                      final profileImageUrl =
+                          data['profileImageUrl'] as String?;
+                      return Center(
+                        child: Column(
+                          children: [
+                            CircleAvatar(
+                              radius: isWeb ? 80 : 60,
+                              backgroundImage:
+                                  profileImageUrl != null
+                                      ? NetworkImage(profileImageUrl)
+                                      : const AssetImage(
+                                            'assets/Profile-ring.png',
+                                          )
+                                          as ImageProvider,
                             ),
-                          ),
-                          const SizedBox(width: 5),
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.white),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Edit Profile Clicked"),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  profileName,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
+                                const SizedBox(width: 5),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("Edit Profile Clicked"),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  )
+                else
+                  const Center(
+                    child: Text(
+                      "No user logged in",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                ),
                 const SizedBox(height: 30),
-
-                // Options List (unchanged)
+                // Options List
                 Expanded(
                   child: ListView(
                     children: [
                       ListTile(
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Account Clicked")),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AccountScreen(),
+                            ),
                           );
                         },
                         leading: const Icon(Icons.person, color: Colors.white),
@@ -135,8 +164,11 @@ class ProfileScreen extends StatelessWidget {
                       const Divider(color: Colors.grey),
                       ListTile(
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Support Clicked")),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SupportScreen(),
+                            ),
                           );
                         },
                         leading: const Icon(Icons.help, color: Colors.white),
@@ -152,8 +184,11 @@ class ProfileScreen extends StatelessWidget {
                       const Divider(color: Colors.grey),
                       ListTile(
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("About Us Clicked")),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AboutUsScreen(),
+                            ),
                           );
                         },
                         leading: const Icon(Icons.info, color: Colors.white),
@@ -169,13 +204,56 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 // Sign Out Button
                 _buildSignOutButton(context),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class AboutUsScreen extends StatelessWidget {
+  const AboutUsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text("About Us"),
+        backgroundColor: Colors.black,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: const Text(
+          "About Us\n\nWe are dedicated to delivering quality content and outstanding user support. Our team is passionate about creating a seamless experience for our users.",
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
+
+class SupportScreen extends StatelessWidget {
+  const SupportScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text("Support"),
+        backgroundColor: Colors.black,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: const Text(
+          "Support\n\nFor any assistance, please contact our support team at support@example.com or call 1-800-123-4567. We are here to help 24/7.",
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
       ),
     );
   }

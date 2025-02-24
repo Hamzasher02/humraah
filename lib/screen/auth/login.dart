@@ -170,11 +170,12 @@ class LoginScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
+                const SizedBox(height: 100),
                 Image.asset(
-                  'assets/logoup.jpeg', // Replace with your logo
+                  'assets/logo.png', // Replace with your logo
                   height: 80,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 60),
                 // Email Input
                 TextField(
                   controller: emailController,
@@ -205,29 +206,13 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 60),
+
                 // Forgot Password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // Handle forgot password action
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Forgot Password Clicked'),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
+
                 // Login Button
                 Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -251,15 +236,15 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 const Text('or', style: TextStyle(color: Colors.white)),
                 const SizedBox(height: 20),
-                // Continue with Facebook
+                // Facebook Button (with fixed height and width)
                 Padding(
-                  padding: const EdgeInsets.only(left: 20.0, right: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
@@ -267,27 +252,24 @@ class LoginScreen extends StatelessWidget {
                       onPressed: () {
                         // Handle Facebook login
                       },
-                      icon: Padding(
-                        padding: const EdgeInsets.only(right: 20.0),
-                        child: const Icon(Icons.facebook, color: Colors.blue),
-                      ),
+                      icon: const Icon(Icons.facebook, color: Colors.blue),
                       label: const Text(
-                        'FaceBook',
+                        'Facebook',
                         style: TextStyle(color: Colors.black),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Continue with Google
+                // Google Button (with fixed height and width)
                 Padding(
-                  padding: const EdgeInsets.only(left: 20.0, right: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),

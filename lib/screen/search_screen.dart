@@ -6,9 +6,9 @@ class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
 
   Future<void> _playVideo(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
+    final Uri uri = Uri.parse(url);
+    // Launch the URL using the new launchUrl API in external application mode
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
     }
   }
@@ -60,15 +60,15 @@ class SearchScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: StreamBuilder(
+              child: StreamBuilder<QuerySnapshot>(
                 stream:
                     FirebaseFirestore.instance.collection('movies').snapshots(),
                 builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(
+                    return const Center(
                       child: Text(
                         'No movies found',
                         style: TextStyle(color: Colors.white),

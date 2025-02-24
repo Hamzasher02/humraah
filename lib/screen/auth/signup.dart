@@ -196,6 +196,7 @@ class SignupScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Logo
+                const SizedBox(height: 100),
                 Center(
                   child: Image.asset(
                     'assets/logo.png', // Replace with your actual logo
@@ -234,18 +235,18 @@ class SignupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 // Forgot Password Text
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // Forgot Password Action
-                    },
-                    child: const Text(
-                      'Forgot Password?',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
+                // Align(
+                //   alignment: Alignment.centerRight,
+                //   child: TextButton(
+                //     onPressed: () {
+                //       // Forgot Password Action
+                //     },
+                //     child: const Text(
+                //       'Forgot Password?',
+                //       style: TextStyle(color: Colors.white),
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(height: 10),
                 // Signup Button
                 OutlinedButton(
@@ -314,9 +315,12 @@ class SignupScreen extends StatelessWidget {
                     style: TextStyle(color: Colors.black, fontSize: 16),
                   ),
                 ),
+                const SizedBox(height: 10),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
+                    Text("already have an account"),
+                    TextButton(
                       onPressed: () {
                         Navigator.push(
                           context,

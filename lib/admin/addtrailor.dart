@@ -8,9 +8,17 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// IMPORTANT:
+/// For Android (API 33 and above), add the following in your AndroidManifest.xml:
+///   <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+///   <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+/// For Android below API 33, the legacy STORAGE permission is used automatically by permission_handler.
+/// For iOS, add these keys in Info.plist:
+///   NSPhotoLibraryUsageDescription, NSCameraUsageDescription, NSMicrophoneUsageDescription
+
 /// Screen to add a new trailer (with thumbnail and video)
 class AddTrailerScreen extends StatefulWidget {
-  const AddTrailerScreen({Key? key}) : super(key: key);
+  const AddTrailerScreen({super.key});
 
   @override
   _AddTrailerScreenState createState() => _AddTrailerScreenState();
@@ -26,12 +34,19 @@ class _AddTrailerScreenState extends State<AddTrailerScreen> {
   bool _isUploading = false;
   double _uploadProgress = 0.0;
 
-  /// Request media permissions (simplified for this example)
-  Future<bool> _requestMediaPermissions() async {
+  /// Request media permissions.
+  /// For Android 13/14: request Permission.photos for images and Permission.videos for videos.
+  Future<bool> _requestMediaPermissions({required bool forImage}) async {
     if (Platform.isAndroid) {
-      final status = await Permission.storage.request();
-      return status.isGranted;
+      if (forImage) {
+        final status = await Permission.photos.request();
+        return status.isGranted;
+      } else {
+        final status = await Permission.videos.request();
+        return status.isGranted;
+      }
     } else {
+      // On iOS, request photos permission (covers both images and videos).
       final status = await Permission.photos.request();
       return status.isGranted;
     }
@@ -39,7 +54,7 @@ class _AddTrailerScreenState extends State<AddTrailerScreen> {
 
   /// Pick a thumbnail image from gallery.
   Future<void> _pickImage() async {
-    final granted = await _requestMediaPermissions();
+    final granted = await _requestMediaPermissions(forImage: true);
     if (!granted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Media permissions not granted')),
@@ -64,7 +79,7 @@ class _AddTrailerScreenState extends State<AddTrailerScreen> {
 
   /// Pick a trailer video from gallery.
   Future<void> _pickVideo() async {
-    final granted = await _requestMediaPermissions();
+    final granted = await _requestMediaPermissions(forImage: false);
     if (!granted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Media permissions not granted')),
@@ -115,12 +130,12 @@ class _AddTrailerScreenState extends State<AddTrailerScreen> {
       final thumbPath = 'trailers_thumbnails/$trailerId.png';
       final videoPath = 'trailers_videos/$trailerId.mp4';
 
-      // 1. Upload thumbnail
+      // 1. Upload thumbnail.
       final thumbRef = FirebaseStorage.instance.ref(thumbPath);
       await thumbRef.putFile(_thumbnail!);
       final thumbUrl = await thumbRef.getDownloadURL();
 
-      // 2. Upload video with progress tracking
+      // 2. Upload video with progress tracking.
       final videoRef = FirebaseStorage.instance.ref(videoPath);
       final uploadTask = videoRef.putFile(_video!);
 
@@ -134,7 +149,7 @@ class _AddTrailerScreenState extends State<AddTrailerScreen> {
       await uploadTask.whenComplete(() => null);
       final videoUrl = await videoRef.getDownloadURL();
 
-      // 3. Store trailer details in Firestore
+      // 3. Store trailer details in Firestore.
       await FirebaseFirestore.instance
           .collection('trailers')
           .doc(trailerId)
@@ -233,14 +248,42 @@ class _AddTrailerScreenState extends State<AddTrailerScreen> {
   }
 }
 
-/// Screen to display list of trailers and launch video URLs.
+/// Screen to display list of trailers, launch video URLs, and delete trailers.
 class TrailerListScreen extends StatelessWidget {
-  const TrailerListScreen({Key? key}) : super(key: key);
+  const TrailerListScreen({super.key});
 
+  /// Launches a given URL in the default external browser.
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       throw 'Could not launch $url';
+    }
+  }
+
+  /// Deletes a trailer document and its associated files from Firebase Storage.
+  Future<void> _deleteTrailer(BuildContext context, String trailerId) async {
+    try {
+      // Define the storage paths based on trailerId.
+      final thumbPath = 'trailers_thumbnails/$trailerId.png';
+      final videoPath = 'trailers_videos/$trailerId.mp4';
+
+      // Delete thumbnail and video files.
+      await FirebaseStorage.instance.ref(thumbPath).delete();
+      await FirebaseStorage.instance.ref(videoPath).delete();
+
+      // Delete the trailer document from Firestore.
+      await FirebaseFirestore.instance
+          .collection('trailers')
+          .doc(trailerId)
+          .delete();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Trailer deleted successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error deleting trailer: $e')));
     }
   }
 
@@ -254,9 +297,14 @@ class TrailerListScreen extends StatelessWidget {
             onTap:
                 () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => AddTrailerScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const AddTrailerScreen(),
+                  ),
                 ),
-            child: Icon(Icons.add),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Icon(Icons.add),
+            ),
           ),
         ],
       ),
@@ -281,6 +329,7 @@ class TrailerListScreen extends StatelessWidget {
             itemCount: docs.length,
             itemBuilder: (context, index) {
               final data = docs[index].data() as Map<String, dynamic>;
+              final trailerId = docs[index].id;
               final name = data['name'] ?? 'No Name';
               final description = data['description'] ?? '';
               final thumbnail = data['thumbnail'] ?? '';
@@ -292,6 +341,37 @@ class TrailerListScreen extends StatelessWidget {
                         : null,
                 title: Text(name),
                 subtitle: Text(description),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder:
+                          (ctx) => AlertDialog(
+                            title: const Text('Delete Trailer'),
+                            content: const Text(
+                              'Are you sure you want to delete this trailer?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.of(ctx).pop();
+                                  await _deleteTrailer(context, trailerId);
+                                },
+                                child: const Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                    );
+                  },
+                ),
                 onTap: () => _launchURL(videoUrl),
               );
             },

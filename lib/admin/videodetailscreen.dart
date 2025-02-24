@@ -386,7 +386,7 @@ class _VideoDetailScreenState extends State<VideoDetailScreen> {
 /// The user can tap fullscreen to open `_FullScreenVideoPlayer`.
 class _CustomVideoPlayer extends StatefulWidget {
   final VideoPlayerController controller;
-  const _CustomVideoPlayer({super.key, required this.controller});
+  const _CustomVideoPlayer({required this.controller});
 
   @override
   State<_CustomVideoPlayer> createState() => _CustomVideoPlayerState();
@@ -564,7 +564,7 @@ class _CustomVideoPlayerState extends State<_CustomVideoPlayer> {
 /// Full-screen video player with the **same** overlay in landscape.
 class _FullScreenVideoPlayer extends StatefulWidget {
   final VideoPlayerController controller;
-  const _FullScreenVideoPlayer({super.key, required this.controller});
+  const _FullScreenVideoPlayer({required this.controller});
 
   @override
   State<_FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();

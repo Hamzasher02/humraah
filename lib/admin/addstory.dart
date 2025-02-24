@@ -21,11 +21,22 @@ class _AdminAddStoryScreenState extends State<AdminAddStoryScreen> {
   String? _mediaType; // 'image' or 'video'
   bool _isUploading = false;
 
-  /// Request storage (and camera) permission.
+  /// Request necessary permissions for storage and camera.
   Future<bool> _requestPermission() async {
-    final status = await Permission.storage.request();
-    final cameraStatus = await Permission.camera.request();
-    return status.isGranted && cameraStatus.isGranted;
+    if (Platform.isAndroid) {
+      // For Android 13/14, request photos and videos permissions.
+      final photosStatus = await Permission.photos.request();
+      final videosStatus = await Permission.videos.request();
+      final cameraStatus = await Permission.camera.request();
+      return photosStatus.isGranted &&
+          videosStatus.isGranted &&
+          cameraStatus.isGranted;
+    } else {
+      // For iOS, request photos and camera permissions.
+      final photosStatus = await Permission.photos.request();
+      final cameraStatus = await Permission.camera.request();
+      return photosStatus.isGranted && cameraStatus.isGranted;
+    }
   }
 
   /// Show a dialog to choose media source and type.

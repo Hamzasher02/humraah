@@ -142,14 +142,8 @@ class _AdminMovieScreenState extends State<AdminMovieScreen> {
                           ElevatedButton(
                             onPressed: () async {
                               if (nameController.text.isNotEmpty) {
-                                String? thumbUrl =
-                                    movieDoc != null
-                                        ? movieDoc.get('thumbnail')
-                                        : null;
-                                String? videoUrl =
-                                    movieDoc != null
-                                        ? movieDoc.get('video')
-                                        : null;
+                                String? thumbUrl = movieDoc?.get('thumbnail');
+                                String? videoUrl = movieDoc?.get('video');
 
                                 if (thumbnail != null) {
                                   var thumbRef = _storage.ref().child(
